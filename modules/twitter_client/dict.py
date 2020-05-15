@@ -1,0 +1,1 @@
+trigger_words = ["/summarize", "/summary"]
