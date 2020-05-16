@@ -6,7 +6,7 @@ from modules.twitter_client.dict import trigger_words
 
 
 class TwitterClient:
-    def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret):
+    def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret, db):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
         self.access_token = access_token
@@ -15,6 +15,7 @@ class TwitterClient:
         self.api = tweepy.API(self.auth)
         self.me = self.api.me()
         self.list_trigger_words = trigger_words
+        self.db = db
 
     def authentication(self):
         self.auth = tweepy.OAuthHandler(
@@ -62,9 +63,21 @@ class TwitterClient:
 
             summary = self.get_summary(url)
             status = f"Summary: {summary}\n {url}"
-            self.api.update_status(
-                status=status,
-                in_reply_to_status_id=tweet.id,
-                auto_populate_reply_metadata=True)
+
+            try:
+                self.api.update_status(
+                    status=status,
+                    in_reply_to_status_id=tweet.id,
+                    auto_populate_reply_metadata=True)
+                data = {'user_id': tweet.user.id, 'url_links': url,
+                        'command': 'summarization', 'latest_mention_id': tweet.id}
+                self.db.insert_object(data)
+
+            except tweepy.TweepError as e:
+                data = {'user_id': tweet.user.id, 'url_links': url,
+                        'command': 'summarization', 'latest_mention_id': tweet.id}
+                self.db.insert_object(data)
+                print(e)
+
             print(f"Tweeting:\n{status}")
             time.sleep(60)
