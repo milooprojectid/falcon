@@ -13,7 +13,7 @@ class Database:
             db_password = os.environ.get("DB_PASS")
             db_cluster = os.environ.get("DB_CLUSTER")
             self.client = pymongo.MongoClient(
-                "mongodb+srv://{}:{}@{}-kdbqm.mongodb.net/test?retryWrites=true&w=majority".format(db_user, db_password, db_cluster))
+                f"mongodb+srv://{db_user}:{db_password}@{db_cluster}-kdbqm.mongodb.net/test?retryWrites=true&w=majority")
 
         self.db = None
         self.collection = None
@@ -22,7 +22,7 @@ class Database:
         try:
             db_list = self.client.list_database_names()
             if database in db_list:
-                print('🗄️  connected to {} database'.format(database))
+                print(f"🗄️  {database} selected")
                 self.db = self.client[database]
             else:
                 print('no database such as {} found'.format(database))
@@ -35,9 +35,9 @@ class Database:
             col_list = self.db.list_collection_names()
             if collection in col_list:
                 self.collection = self.db[collection]
-                print("➡️  {} collection selected".format(collection))
+                print(f"➡️  {collection} selected")
             else:
-                print('no collection such as {} found'.format(collection))
+                print(f"no collection such as {collection} found")
         except Exception as e:
             print(e)
 
@@ -48,10 +48,8 @@ class Database:
             for i, t in enumerate(list_col):
                 if i == 0:
                     last = t
-                    print("🔥 {} selected".format(last))
+                    print(f"🔥 {last} selected")
                     return last
-        else:
-            print('!!! Please connect first !!!')
 
     def insert_object(self, data):
         last = self.find_last_object()
@@ -69,4 +67,4 @@ class Database:
     def find_and_modify(self, key, value):
         self.collection.find_one_and_update(
             {'key': key}, {'$set': {'value': value}})
-        print("Value of {0} changed to {1}".format(key, value))
+        print(f"Value of {key} changed to {value}")
