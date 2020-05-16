@@ -1,23 +1,27 @@
+import os
+
 from flask import Flask, render_template, request
 from tweepy import OAuthHandler, API
-from os import getenv
 from dotenv import load_dotenv
+from modules.db.mongodb import MongoDB
 
 app = Flask(__name__)
 
 load_dotenv()
 
-consumer_key = getenv('TW_CONSUMER_KEY')
-consumer_secret = getenv('TW_CONSUMER_SECRET')
+consumer_key = os.getenv('TW_CONSUMER_KEY')
+consumer_secret = os.getenv('TW_CONSUMER_SECRET')
 
-auth = OAuthHandler(
-        consumer_key, consumer_secret)
+auth = OAuthHandler(consumer_key,
+                    consumer_secret)
+
 
 @app.route("/login")
 def login():
     login_url = auth.get_authorization_url()
 
     return render_template("login.html", data=login_url)
+
 
 @app.route("/callback")
 def callback():
@@ -27,10 +31,17 @@ def callback():
     access_token = token[0]
     access_secret = token[1]
 
-    new_auth = OAuthHandler(consumer_key, consumer_secret)
-    new_auth.set_access_token(access_token, access_secret)
+    data = {'consumer_key': consumer_key, 'consumer_secret': consumer_secret,
+            'access_token': access_token, 'access_secret': access_secret}
+    db = MongoDB()
+    if db.connect_db("miloo_id"):
+        db.select_col("environment")
+        db.find_and_modify(data)
+    else:
+        db.insert_first_data(data)
 
     return f"{consumer_key}, {consumer_secret}\n{access_token}, {access_secret}"
+
 
 if __name__ == "__main__":
     app.run(debug=True)
