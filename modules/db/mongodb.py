@@ -52,6 +52,10 @@ class MongoDB:
                 print(f"➡️  {collection} selected")
             else:
                 print(f"no collection such as {collection} found")
+                choice = input(f"create {collection}? Y/n ")
+                if choice == "y" or choice == "Y" or choice == '':
+                    self.collection = self.db[collection]
+                    print(f"Collection {collection} created")
         except Exception as e:
             print(e)
 
