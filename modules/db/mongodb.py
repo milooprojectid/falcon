@@ -2,7 +2,7 @@ import pymongo
 import os
 
 
-class Database:
+class MongoDB:
     def __init__(self):
 
         if os.environ.get("APP_ENV") == 'LOCAL':
@@ -24,11 +24,25 @@ class Database:
             if database in db_list:
                 print(f"🗄️  {database} selected")
                 self.db = self.client[database]
+                return True
             else:
-                print('no database such as {} found'.format(database))
+                print(f"{database} not found")
+                choice = input(f"create {database}? Y/n ")
+                if choice == "y" or choice == "Y" or choice == '':
+                    self.db = self.client[f"{database}"]
+                    print(f"Database {database} created")
+                    new_collection = input(f"name for new collection? ")
+                    self.collection = self.db[new_collection]
+                    print(f"Collection {new_collection} created")
+                else:
+                    return None
 
         except Exception as e:
             print(e)
+
+    def insert_first_data(self, data: dict):
+        data['_id'] = 1
+        self.collection.insert_one(data)
 
     def select_col(self, collection):
         try:
@@ -48,7 +62,6 @@ class Database:
             for i, t in enumerate(list_col):
                 if i == 0:
                     last = t
-                    print(f"🔥 {last} selected")
                     return last
 
     def insert_object(self, data):
@@ -64,7 +77,7 @@ class Database:
         for a in self.collection.find({'key': key}):
             return a['value']
 
-    def find_and_modify(self, key, value):
+    def find_and_modify(self, data):
         self.collection.find_one_and_update(
-            {'key': key}, {'$set': {'value': value}})
-        print(f"Value of {key} changed to {value}")
+            {'key': '_id'}, {'$set': data})
+        print(f"Data changed to {data}")
