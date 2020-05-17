@@ -5,7 +5,6 @@ from modules.grpc.client import GrpcClient
 from dotenv import load_dotenv
 from os import getenv
 
-
 def run():
     load_dotenv()
 
