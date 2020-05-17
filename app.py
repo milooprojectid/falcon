@@ -10,7 +10,9 @@ def run():
     load_dotenv()
 
     DB_NAME = getenv('DB_NAME')
-    db = MongoDB()
+    DB_CONNECTION_STRING = getenv('DB_CONNECTION_STRING')
+
+    db = MongoDB(DB_CONNECTION_STRING)
     db.connect_db(DB_NAME)
     db.select_col('environment')
 
