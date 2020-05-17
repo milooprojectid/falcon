@@ -1,0 +1,5 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+$DIR/set_venv
+source $DIR/../venv/bin/activate
+pip install -r $DIR/../requirements.txt
+deactivate
