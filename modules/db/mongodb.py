@@ -25,15 +25,12 @@ class MongoDB:
                 return True
             else:
                 print(f"{database} not found")
-                choice = input(f"create {database}? Y/n ")
-                if choice == "y" or choice == "Y" or choice == '':
-                    self.db = self.client[f"{database}"]
-                    print(f"Database {database} created")
-                    new_collection = input(f"name for new collection? ")
-                    self.collection = self.db[new_collection]
-                    print(f"Collection {new_collection} created")
-                else:
-                    return None
+                self.db = self.client[f"{database}"]
+                print(f"Database {database} created")
+
+                new_collection = "environment"
+                self.collection = self.db[new_collection]
+                print(f"Collection {new_collection} created")
 
         except Exception as e:
             print(e)
@@ -50,10 +47,8 @@ class MongoDB:
                 print(f"➡️  {collection} selected")
             else:
                 print(f"no collection such as {collection} found")
-                choice = input(f"create {collection}? Y/n ")
-                if choice == "y" or choice == "Y" or choice == '':
-                    self.collection = self.db[collection]
-                    print(f"Collection {collection} created")
+                self.collection = self.db[collection]
+                print(f"Collection {collection} created")
         except Exception as e:
             print(e)
 
