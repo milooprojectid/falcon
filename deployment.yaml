@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: falcon-service
+  template:
+    metadata:
+      labels:
+        app: falcon-service
+    spec:
+      containers:
+        - name: falcon-service
+          image: asia.gcr.io/miloo-phoenix/falcon
+          resources:
+              limits:
+                memory: "250Mi"
+                cpu: "0.5"
+          # ports:
+          #   - containerPort: 5001
+          #   - containerPort: 50051
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcon-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: falcon-service
+  # ports:
+    # - port: 8020  # REST
+    #   targetPort: 5001
+    #   name: "falcon-rest-port"
+    # - port: 8025  # gRPC
+    #   targetPort: 50051
+    #   name: "falcon-grpc-port"
