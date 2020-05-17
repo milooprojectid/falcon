@@ -14,15 +14,13 @@ def run():
 
     db = MongoDB(DB_CONNECTION_STRING)
     db.connect_db(DB_NAME)
-    db.select_col('environment')
 
     grpc = GrpcClient(getenv('SERVICE_GRPC_STORM_URL'))
 
-    env = db.find_last_object()
-    consumer_key = env['consumer_key']
-    consumer_secret = env['consumer_secret']
-    access_token = env['access_token']
-    access_secret = env['access_secret']
+    consumer_key = getenv("TW_CONSUMER_KEY")
+    consumer_secret = getenv("TW_CONSUMER_SECRET")
+    access_token = getenv("TW_ACCESS_TOKEN")
+    access_secret = getenv("TW_ACCESS_SECRET")
 
     tw = TwitterClient(
         consumer_key,
