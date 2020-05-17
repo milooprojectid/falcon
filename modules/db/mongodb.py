@@ -3,20 +3,18 @@ import os
 
 
 class MongoDB:
-    def __init__(self):
-
-        if os.environ.get("APP_ENV") == 'LOCAL':
-            self.client = pymongo.MongoClient(
-                "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false")
-        else:
-            db_user = os.environ.get("DB_USER")
-            db_password = os.environ.get("DB_PASS")
-            db_cluster = os.environ.get("DB_CLUSTER")
-            self.client = pymongo.MongoClient(
-                f"mongodb+srv://{db_user}:{db_password}@{db_cluster}-kdbqm.mongodb.net/test?retryWrites=true&w=majority")
-
+    def __init__(self, connectionString):
+        self.client = pymongo.MongoClient(connectionString)
         self.db = None
         self.collection = None
+
+        # if os.environ.get("APP_ENV") == 'LOCAL':
+        # else:
+        #     db_user = os.environ.get("DB_USER")
+        #     db_password = os.environ.get("DB_PASS")
+        #     db_cluster = os.environ.get("DB_CLUSTER")
+        #     self.client = pymongo.MongoClient(
+        #         f"mongodb+srv://{db_user}:{db_password}@{db_cluster}-kdbqm.mongodb.net/test?retryWrites=true&w=majority")
 
     def connect_db(self, database):
         try:
@@ -27,15 +25,12 @@ class MongoDB:
                 return True
             else:
                 print(f"{database} not found")
-                choice = input(f"create {database}? Y/n ")
-                if choice == "y" or choice == "Y" or choice == '':
-                    self.db = self.client[f"{database}"]
-                    print(f"Database {database} created")
-                    new_collection = input(f"name for new collection? ")
-                    self.collection = self.db[new_collection]
-                    print(f"Collection {new_collection} created")
-                else:
-                    return None
+                self.db = self.client[f"{database}"]
+                print(f"Database {database} created")
+
+                new_collection = "environment"
+                self.collection = self.db[new_collection]
+                print(f"Collection {new_collection} created")
 
         except Exception as e:
             print(e)
@@ -52,10 +47,8 @@ class MongoDB:
                 print(f"➡️  {collection} selected")
             else:
                 print(f"no collection such as {collection} found")
-                choice = input(f"create {collection}? Y/n ")
-                if choice == "y" or choice == "Y" or choice == '':
-                    self.collection = self.db[collection]
-                    print(f"Collection {collection} created")
+                self.collection = self.db[collection]
+                print(f"Collection {collection} created")
         except Exception as e:
             print(e)
 
@@ -70,7 +63,7 @@ class MongoDB:
 
     def insert_object(self, data):
         last = self.find_last_object()
-        last_id = last['_id'] + 1
+        last_id = last['_id'] + 1 if last != None else 1
 
         data.update({'_id': last_id})
 
