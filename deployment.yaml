@@ -23,16 +23,16 @@ spec:
           #   - containerPort: 5001
           #   - containerPort: 50051
 
----
+# ---
 
-apiVersion: v1
-kind: Service
-metadata:
-  name: falcon-cluster-ip-service
-spec:
-  type: ClusterIP
-  selector:
-    app: falcon-service
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: falcon-cluster-ip-service
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app: falcon-service
   # ports:
     # - port: 8020  # REST
     #   targetPort: 5001
