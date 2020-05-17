@@ -1,12 +1,12 @@
 import tweepy
 import requests
-import time
 
+from time import sleep
 from modules.twitter_client.dict import trigger_words
 
 
 class TwitterClient:
-    def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret, db):
+    def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret, db, grpc):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
         self.access_token = access_token
@@ -16,6 +16,7 @@ class TwitterClient:
         self.me = self.api.me()
         self.list_trigger_words = trigger_words
         self.db = db
+        self.grpc = grpc
 
     def authentication(self):
         self.auth = tweepy.OAuthHandler(
@@ -39,34 +40,16 @@ class TwitterClient:
 
         return new_since_id
 
-    def get_summary(self, text):
-        url = "http://0.0.0.0:5001/summarize"
-        data = {'text': text}
-        headers = {
-            'Content-Type': 'application/json'
-        }
-
-        response = requests.post(url, headers=headers, json=data)
-
-        if response.status_code == 200:
-            data = response.json()
-            summary = data['data']['summary']
-            return summary
-        else:
-            data = response.json()
-            return data['message']
-
     def process_tweet(self, list_tweet):
         for tweet in reversed(list_tweet):
             urls = tweet.entities['urls']
             url = urls[-1]['expanded_url']
 
-            summary = self.get_summary(url)
-            status = f"Summary: {summary}\n {url}"
+            status = self.grpc.summarize(url)
 
             try:
                 self.api.update_status(
-                    status=status,
+                    status=f"Summary: {status}",
                     in_reply_to_status_id=tweet.id,
                     auto_populate_reply_metadata=True)
                 data = {'user_id': tweet.user.id, 'url_links': url,
@@ -80,4 +63,4 @@ class TwitterClient:
                 print(e)
 
             print(f"Tweeting:\n{status}")
-            time.sleep(60)
+            sleep(30)
