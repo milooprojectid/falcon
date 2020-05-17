@@ -25,20 +25,29 @@ class TwitterClient:
         return self.auth
 
     def get_mention(self, since_id):
-        new_since_id = since_id
+        if since_id != 0:
+            new_since_id = since_id
+            list_mentions = []
+            for tweet in tweepy.Cursor(self.api.mentions_timeline, since_id=since_id).items():
+                new_since_id = max(tweet.id, new_since_id)
+                for trigger_word in self.list_trigger_words:
+                    if trigger_word in tweet.text:
+                        list_mentions.append(tweet)
+            self.process_tweet(list_mentions)
+            return new_since_id
+        else:
+            list_mentions = []
+            tweets = self.api.mentions_timeline(count=1)
+            tweet = tweets[-1]
 
-        list_mentions = []
-
-        for tweet in tweepy.Cursor(self.api.mentions_timeline, since_id=since_id).items():
-            new_since_id = max(tweet.id, new_since_id)
-
+            new_since_id = tweet.id
             for trigger_word in self.list_trigger_words:
-                if trigger_word in tweet.text:
-                    list_mentions.append(tweet)
+                    if trigger_word in tweet.text:
+                        list_mentions.append(tweet)
 
-        self.process_tweet(list_mentions)
+            self.process_tweet(list_mentions)
 
-        return new_since_id
+            return new_since_id
 
     def process_tweet(self, list_tweet):
         for tweet in reversed(list_tweet):

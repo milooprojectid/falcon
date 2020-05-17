@@ -63,7 +63,7 @@ class MongoDB:
 
     def insert_object(self, data):
         last = self.find_last_object()
-        last_id = last['_id'] + 1
+        last_id = last['_id'] + 1 if last != None else 1
 
         data.update({'_id': last_id})
 

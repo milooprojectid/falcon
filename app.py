@@ -9,6 +9,8 @@ from os import getenv
 def run():
     load_dotenv()
 
+    REFRESH_INTERVAL = int(getenv('REFRESH_INTERVAL')) if getenv('REFRESH_INTERVAL') != None else 60
+
     DB_NAME = getenv('DB_NAME')
     DB_CONNECTION_STRING = getenv('DB_CONNECTION_STRING')
 
@@ -32,21 +34,12 @@ def run():
     )
 
     db.select_col('mentions')
-    if db.collection.count() == 0:
-        data = {'user_id': 0, 'url_links': 'null',
-                'command': 'null', 'latest_mention_id': 0}
-        db.insert_first_data(data)
 
     while True:
         last_mention = db.find_last_object()
-        last_mention_id = last_mention['latest_mention_id']
-
-        since_id = tw.get_mention(last_mention_id)
-
-        if last_mention_id == since_id:
-            print(f"No new mention")
-
-        sleep(30)
+        last_mention_id = last_mention['latest_mention_id'] if last_mention != None else 0
+        tw.get_mention(last_mention_id)
+        sleep(REFRESH_INTERVAL)
 
 
 if __name__ == "__main__":
